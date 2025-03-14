@@ -1,0 +1,88 @@
+[project]
+name = "reputation"
+version = "0.0.1"
+description = "Python package dependency analytics. Know what you depend on!"
+authors = [{ name = "Zach Kurtz", email = "zkurtz@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas >=1.5.0",
+]
+
+[dependency-groups]
+dev = [
+  "pre-commit==4.0.1",
+  "pyright==1.1.391",
+  "ruff==0.8.5",
+  "pytest==8.3.4",
+  "bump-my-version>=0.30.0",
+]
+
+[project.urls]
+Source = "https://github.com/zkurtz/reputation"
+
+[tool.uv]
+package = true
+
+[tool.bumpversion]
+current_version = "0.7.4"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+tag = false
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+moveable_tags = []
+commit_args = "--no-verify"
+setup_hooks = []
+pre_commit_hooks = []
+post_commit_hooks = []
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests",]
+
+[tool.pyright]
+include = ["reputation", "tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  # ruff defaults:
+  "E4", "E7", "E9", "F",
+  # other rule groups:
+  "E5", # line length
+  "I", # flake8-import-order
+  "TID", # flake8-tidy-imports
+  "D", # google-style docstrings
+]
+ignore = [
+  "D202", # would require one blank line after the last section of a multi-line docstring
+  "D203", # would require one blank line at start of class docstring
+  "D213", # would require multi-line docstring to start with a hard return
+  "D401", # would require imperative mood in docstring
+  "D413", # would put blank line at end of each multiline docstring
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["D104"] # would require module-level documentation
+"test_*.py" = ["D"]
