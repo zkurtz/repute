@@ -19,3 +19,10 @@ reputation requirements.txt > reputation_report.csv
 ```
 
 Upload your csv to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies.
+
+
+## Details
+
+Installation:
+- We're [on pypi](https://pypi.org/project/reputation/), so `pip install reputation`.
+- Consider using the [simplest-possible virtual environment](https://gist.github.com/zkurtz/4c61572b03e667a7596a607706463543) if working directly on this repo.
