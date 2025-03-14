@@ -42,9 +42,6 @@ commit = true
 message = "Bump version: {current_version} → {new_version}"
 moveable_tags = []
 commit_args = "--no-verify"
-setup_hooks = []
-pre_commit_hooks = []
-post_commit_hooks = []
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
