@@ -8,13 +8,14 @@ Python package dependency analytics. Know what you depend on!
 
 ## Quick start guide
 
-This guide assumes that you use a uv-based python virtual environment.
+This guide assumes that you use a uv-based python virtual environment:
+```
+# generate current pinned requirements:
+uv pip freeze --exclude-editable > requirements.txt
 
-Do `uv pip freeze > requirements.txt` to generate a `requirements.txt` file.
-
-Then run `reputation` on the `requirements.txt` file:
-
-```bash
-pip install reputation
+# install reputation and use it to generate a report:
+uv pip install reputation
 reputation requirements.txt > reputation_report.csv
 ```
+
+Upload your csv to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies.
