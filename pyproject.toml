@@ -6,7 +6,11 @@ authors = [{ name = "Zach Kurtz", email = "zkurtz@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "attrs>=25.3.0",
+    "orjson>=3.10.15",
     "pandas >=1.5.0",
+    "requests>=2.32.3",
+    "tqdm>=4.67.1",
 ]
 
 [dependency-groups]
