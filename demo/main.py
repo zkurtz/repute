@@ -1,4 +1,7 @@
-"""Main module for the demo package."""
+"""Main module for the demo package.
+
+This package exists only to declare dependencies. It does not contain any meaningful code.
+"""
 
 
 def main():
