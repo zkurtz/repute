@@ -21,28 +21,90 @@ Next, do `pip install reputation`  (or do `pip install .` in your clone of the r
 
 Finally, upload your `reputation_report.csv` to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies. We've uploaded our demo example to a public spreadsheet on Google Sheets [here]() (coming soon ...). Consider following sorting that spreadsheet on each column as you read about each metric below.
 
-## Overview of reputation metrics
+## Overview of `reputation` metrics
 
 First, hopefully it goes without saying none of these metrics in isolation are highly informative; defining and measuring reputation is a complex problem, so each of these metrics should be considered only starting point.
 
-### Version age
+### `version_age_days`
 
 If the version of a package you depend on is very old, this may increase the risk that your package includes bugs that have been fixed in newer versions or simply be less efficient or powerful than state-of-the-art packages.
 
-### Time since latest package release
+### `time_since_latest_release_days`
 
 If a package has not been updated in a long time, this may indicate that the package is no longer maintained, which could be a problem if you encounter a bug or need a new feature.
 
-### PyPI download count
+### `download_count`
 
 Coming soon ...
 
-### Github star count
+### `star_count`
 
 Coming soon ...
 
-## Details
+## Installation
 
 Installation:
 - We're [on pypi](https://pypi.org/project/reputation/), so `pip install reputation`.
 - Consider using the [simplest-possible virtual environment](https://gist.github.com/zkurtz/4c61572b03e667a7596a607706463543) if working directly on this repo.
+
+
+## Background
+
+Assessing the quality of python dependencies is a complex problem that goes far beyond the scope of this package. Here's a brief overview of the types of factors that could be considered in a more comprehensive review:
+
+1. **Dependency health metrics:**
+   - Total dependency count (direct and transitive)
+   - Dependency tree depth
+   - Presence of known problematic dependencies
+   - Supply chain integrity (signed packages, integrity verification)
+
+1. **Maintenance indicators:**
+   - Time since last commit/release
+   - Release frequency and consistency
+   - Issue resolution time
+   - Pull request responsiveness
+   - Number of active maintainers
+   - Bus factor (concentration of commits among maintainers)
+
+1. **Code quality metrics:**
+   - Test coverage percentage
+   - CI/CD pipeline robustness
+   - Static analysis scores
+   - Documentation completeness
+   - Adherence to PEP standards
+   - Type hint coverage
+   - Presence of deprecation warnings
+
+1. **Community health:**
+   - GitHub stars/forks trend over time
+   - Download statistics from PyPI
+   - Stack Overflow question frequency and answer rates
+   - Corporate backing or foundation support
+
+1. **Operational considerations:**
+   - Package size (both download and installed)
+   - Import time impact
+   - Memory footprint
+   - Performance benchmarks
+   - Compatibility with target Python versions
+   - Platform compatibility (Windows/Linux/macOS)
+
+1. **Security-specific indicators:**
+   - OSSF Scorecard results
+   - Use of memory-unsafe dependencies (C extensions)
+   - History of CVEs and their severity
+   - Time to patch previous vulnerabilities
+   - Application of secure coding practices
+   - Two-factor authentication usage by maintainers
+   - Dependency pinning practices
+
+1. **Build process integrity:**
+   - Reproducible builds support
+   - Build artifact signing
+   - Provenance information availability
+   - Software Bill of Materials (SBOM) availability
+
+1. **API stability:**
+   - Breaking change frequency
+   - Deprecation policy adherence
+   - Semantic versioning compliance

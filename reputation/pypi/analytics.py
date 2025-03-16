@@ -115,6 +115,19 @@ def extract_values(package: Package) -> Data:
     )
 
 
+def derive_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Derive features from the raw pypi metadata.
+
+    Args:
+        df: Raw pypi metadata
+
+    Returns: A table of derived pypi features indexed by package (name, version)
+    """
+    df["version_age_days"] = (df["record_timestamp"] - df["release_timestamp"]).dt.days
+    df["time_since_last_release_days"] = (datetime.now() - df["latest_release_timestamp"]).dt.days
+    return df
+
+
 def get_features(packages: list[Package]) -> pd.DataFrame:
     """Get relevant pypi metadata for a list of packages.
 
@@ -128,9 +141,9 @@ def get_features(packages: list[Package]) -> pd.DataFrame:
     df = pd.DataFrame([extract_values(item).dict for item in packages]).set_index("name").sort_index()
     df_latest = pd.DataFrame([extract_values(item).dict for item in latest_packages]).set_index("name").sort_index()
     assert df.index.equals(df_latest.index), "Index mismatch"
-    df["days_prior_to_latest_release"] = (df_latest["release_timestamp"] - df["release_timestamp"]).dt.days
+    df["latest_release_timestamp"] = df_latest["release_timestamp"]
     df = INDEX(df)
-    return df.sort_values("release_timestamp", ascending=False)
+    return derive_features(df)
 
 
 if __name__ == "__main__":
