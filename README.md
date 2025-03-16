@@ -17,9 +17,9 @@ cd demo
 pip freeze --exclude-editable > requirements.txt
 ```
 
-Next, do `pip install reputation`  (or do `pip install .` in your clone of the repo) and run `reputation requirements.txt`. This will output a csv file with a report on the health of your dependencies:
+Next, install reputation like `pip install reputation`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
 
-Finally, upload your `reputation_report.csv` to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies. We've uploaded our demo example to a public spreadsheet on Google Sheets [here]() (coming soon ...). Consider following sorting that spreadsheet on each column as you read about each metric below.
+Run `repute requirements.txt` to output a `reputation_report.csv` file with a report on the health of your dependencies. Upload this to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies. We've uploaded our demo example to a public spreadsheet on Google Sheets [here]() (coming soon ...).
 
 ## Overview of `reputation` metrics
 
