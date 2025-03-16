@@ -9,8 +9,8 @@ from attrs import asdict, frozen
 from pandahandler.indexes import Index
 
 from reputation import requirements
+from reputation.cache import Cache
 from reputation.data import Package
-from reputation.pypi.cache import Cache
 from reputation.pypi.web import CACHE_DIR, download_pypi_data
 
 INDEX = Index(

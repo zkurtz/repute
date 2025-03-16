@@ -9,10 +9,9 @@ from attrs import field, frozen
 from tqdm import tqdm
 
 from reputation import paths, requirements
-from reputation.pypi.cache import Cache
+from reputation.cache import CACHE_TIMESTAMP, Cache
 
 CACHE_DIR = paths.CACHE_DIR / "pypi"
-CACHE_TIMESTAMP = "cache_timestamp"
 NOW = datetime.now()
 
 
