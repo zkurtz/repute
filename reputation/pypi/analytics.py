@@ -1,123 +1,24 @@
-"""Tools to fetch metadata from PyPI."""
+"""Tools to analyze metadata from PyPI."""
 
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import requests
-from attrs import asdict, field, frozen
+from attrs import asdict, frozen
 from pandahandler.indexes import Index
-from tqdm import tqdm
 
-from reputation import paths, requirements
+from reputation import requirements
 from reputation.data import Package
-from reputation.io import orjson as json_io
+from reputation.pypi.cache import Cache
+from reputation.pypi.web import CACHE_DIR
 
-CACHE_DIR = paths.CACHE_DIR / "pypi"
-CACHE_TIMESTAMP = "cache_timestamp"
-NOW = datetime.now()
 INDEX = Index(
     names=[
         "name",
         "version",
     ]
 )
-
-
-@frozen
-class Client:
-    """Client for interacting with the PyPI API.
-
-    Attributes:
-        session: Requests session to use for API requests
-        base_url: Base URL for the PyPI API
-    """
-
-    session: requests.Session = field(factory=requests.Session)
-    base_url: str = "https://pypi.org/pypi"
-
-    def __call__(self, package_name: str, version: str = "latest") -> dict[str, Any]:
-        """Get the JSON data for a package from PyPI.
-
-        Args:
-            package_name: Name of the package
-            version: Specific version to fetch; defaults to "latest"
-        """
-        # Build URL
-        url = f"{self.base_url}/{package_name}"
-        if version != "latest":
-            url = f"{url}/{version}"
-        url = f"{url}/json"
-
-        # Make request
-        response = self.session.get(url)
-        response.raise_for_status()
-        data = response.json()
-        return data
-
-
-@frozen
-class Cache:
-    """IO wrapper for storing PyPI package metadata or a single package."""
-
-    directory: paths.Path
-    package_id: str
-
-    def __attrs_post_init__(self):
-        """Initialize the cache directory if it's not already there."""
-        self.directory.mkdir(parents=True, exist_ok=True)
-
-    @property
-    def path(self) -> paths.Path:
-        """Path to the cache file."""
-        return self.directory / f"{self.package_id}.json"
-
-    def load(self) -> dict[str, Any] | None:
-        """Try to load cached data for a package.
-
-        Returns:
-            Cached data or None if no cache is available found
-        """
-        if self.path.exists():
-            return json_io.load(self.path)
-        return None
-
-    def save(self, data: dict[str, Any]):
-        """Save data to the cache.
-
-        Args:
-            data: Data to cache
-        """
-        data[CACHE_TIMESTAMP] = datetime.now().isoformat()
-        json_io.save(data, self.path)
-
-
-def download_pypi_data(
-    packages: list[requirements.Package],
-    max_request_per_second: int = 10,
-    cache_duration_days: int = 30,
-) -> None:
-    """Get metadata for multiple packages.
-
-    Args:
-        packages: A list of Package objects (each having `.package_name` and `.version` attributes)
-        max_request_per_second: Maximum number of requests to make per second, to avoid negative attention from PyPI
-        cache_duration_days: Number of days to keep a package's cached data before refreshing it
-    """
-    client = Client()
-    for package in tqdm(packages, desc="Fetching PyPI package data"):
-        cache = Cache(directory=CACHE_DIR, package_id=str(package))
-        data: dict[str, Any] | None = cache.load()
-        if data is not None:
-            cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
-            if cache_timestamp < NOW - timedelta(days=cache_duration_days):
-                data = None
-        if not data:
-            time.sleep(1 / max_request_per_second)
-            data = client(package_name=package.name, version=package.version)
-            cache.save(data=data)
 
 
 @frozen(kw_only=True)
@@ -233,7 +134,7 @@ def get_features(packages: list[Package]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    # Example usage: `python reputation/pypi.py`
+    # Example usage: `python reputation/pypi/analytics.py`
     packages = requirements.parse(Path("demo/requirements.txt"))
     metadata = get_features(packages)
     print(f"Extracted metadata for {len(metadata)} packages:")
