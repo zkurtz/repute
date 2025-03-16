@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import Any
 
 from attrs import frozen
+from dummio import orjson as json_io
 
 from reputation import paths
-from reputation.io import orjson as json_io
 
 CACHE_TIMESTAMP = "cache_timestamp"
 
@@ -44,4 +44,4 @@ class Cache:
             data: Data to cache
         """
         data[CACHE_TIMESTAMP] = datetime.now().isoformat()
-        json_io.save(data, self.path)
+        json_io.save(data, filepath=self.path)
