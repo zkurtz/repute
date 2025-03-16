@@ -29,6 +29,9 @@ Source = "https://github.com/zkurtz/reputation"
 [tool.uv]
 package = true
 
+[tool.uv.workspace]
+members = ["demo"]
+
 [tool.bumpversion]
 current_version = "0.0.2"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
