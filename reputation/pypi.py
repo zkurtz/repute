@@ -2,10 +2,13 @@
 
 import time
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import requests
-from attrs import field, frozen
+from attrs import asdict, field, frozen
+from pandahandler.indexes import Index
 from tqdm import tqdm
 
 from reputation import paths, requirements
@@ -15,10 +18,16 @@ from reputation.io import orjson as json_io
 CACHE_DIR = paths.CACHE_DIR / "pypi"
 CACHE_TIMESTAMP = "cache_timestamp"
 NOW = datetime.now()
+INDEX = Index(
+    names=[
+        "name",
+        "version",
+    ]
+)
 
 
 @frozen
-class PyPIClient:
+class Client:
     """Client for interacting with the PyPI API.
 
     Attributes:
@@ -85,23 +94,28 @@ class Cache:
         json_io.save(data, self.path)
 
 
-def build_packages_data(packages: list[requirements.Package]) -> None:
+def download_pypi_data(
+    packages: list[requirements.Package],
+    max_request_per_second: int = 10,
+    cache_duration_days: int = 30,
+) -> None:
     """Get metadata for multiple packages.
 
     Args:
         packages: A list of Package objects (each having `.package_name` and `.version` attributes)
+        max_request_per_second: Maximum number of requests to make per second, to avoid negative attention from PyPI
+        cache_duration_days: Number of days to keep a package's cached data before refreshing it
     """
-    client = PyPIClient()
+    client = Client()
     for package in tqdm(packages, desc="Fetching PyPI package data"):
         cache = Cache(directory=CACHE_DIR, package_id=str(package))
         data: dict[str, Any] | None = cache.load()
         if data is not None:
             cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
-            if cache_timestamp < NOW - timedelta(days=30):
+            if cache_timestamp < NOW - timedelta(days=cache_duration_days):
                 data = None
         if not data:
-            # For rate limiting, we can add a sleep here:
-            time.sleep(0.1)
+            time.sleep(1 / max_request_per_second)
             data = client(package_name=package.name, version=package.version)
             cache.save(data=data)
 
@@ -112,14 +126,45 @@ class Data:
 
     name: str
     version: str
-    record_timestamp: datetime
-    release_date: datetime | None = None
+    release_timestamp: datetime | None = None
+    license: str | None = None
     github_url: str | None = None
     home_page: str | None = None
     author: str | None = None
     author_email: str | None = None
-    license: str | None = None
     description: str | None = None
+    record_timestamp: datetime
+
+    @property
+    def dict(self) -> dict[str, str]:
+        """Dictionary representation of the package."""
+        return asdict(self)
+
+
+def extract_release_timestamp(package: Package, data: dict[str, Any]) -> datetime:
+    """Extract the release date for a specific version of a package.
+
+    Args:
+        package: Name and version of the package
+        data: The pypi json data (as dictionary) for the package
+    """
+    version = package.version
+    on_failure_msg = f"No release files found for {package.name}=={package.version}"
+    if version == "latest":
+        release_files = data["urls"]
+    elif "releases" in data:
+        releases = data["releases"]
+        if package.version in releases:
+            release_files = releases[package.version]
+        else:
+            raise ValueError(on_failure_msg)
+    elif "urls" in data:
+        release_files = data["urls"]
+    else:
+        raise ValueError(on_failure_msg)
+    any_release_file = release_files[0]
+    release_timestamp_str = any_release_file["upload_time"]
+    return datetime.fromisoformat(release_timestamp_str)
 
 
 def extract_values(package: Package) -> Data:
@@ -137,28 +182,9 @@ def extract_values(package: Package) -> Data:
     cache = Cache(directory=CACHE_DIR, package_id=str(package))
     data = cache.load()
     assert data is not None, f"Package {package} not found in cache"
-    version = package.version
-    info = data["info"]
-    release_date = None
-    if "releases" in data:
-        releases = data["releases"]
-        breakpoint()
-        if version in releases:
-            version = releases[version]
-            if version:
-                # Use the first release file's upload time
-                release_date_str = version[0]["upload_time"]
-                release_date = datetime.fromisoformat(release_date_str)
-    elif "urls" in data:
-        urls = data["urls"]
-        breakpoint()
-        if urls:
-            # If we don't have 'releases', try to get release date from 'urls'
-            release_date_str = urls[0]["upload_time"]
-            release_date = datetime.fromisoformat(release_date_str)
-    else:
-        raise ValueError(f"No release data found for {package}")
+    release_timestamp = extract_release_timestamp(package=package, data=data)
 
+    info = data["info"]
     # Extract GitHub URL
     github_url = None
     project_urls = info.get("project_urls", {}) or {}
@@ -178,7 +204,7 @@ def extract_values(package: Package) -> Data:
         name=package.name,
         version=package.version,
         record_timestamp=datetime.now(),
-        release_date=release_date,
+        release_timestamp=release_timestamp,
         github_url=github_url,
         home_page=info.get("home_page"),
         author=info.get("author"),
@@ -188,12 +214,27 @@ def extract_values(package: Package) -> Data:
     )
 
 
+def get_features(packages: list[Package]) -> pd.DataFrame:
+    """Get relevant pypi metadata for a list of packages.
+
+    Args:
+        packages: A list of Package objects (each having `.package_name` and `.version` attributes)
+
+    Returns: A table of pypi features indexed by package (name, version)
+    """
+    latest_packages = [Package(name=package.name, version="latest") for package in packages]
+
+    df = pd.DataFrame([extract_values(item).dict for item in packages]).set_index("name").sort_index()
+    df_latest = pd.DataFrame([extract_values(item).dict for item in latest_packages]).set_index("name").sort_index()
+    assert df.index.equals(df_latest.index), "Index mismatch"
+    df["days_prior_to_latest_release"] = (df_latest["release_timestamp"] - df["release_timestamp"]).dt.days
+    df = INDEX(df)
+    return df.sort_values("release_timestamp", ascending=False)
+
+
 if __name__ == "__main__":
     # Example usage: `python reputation/pypi.py`
-    from pathlib import Path
-
-    data = requirements.parse(Path("demo/requirements.txt"))
-    build_packages_data(data)
-    metadata = [extract_values(item) for item in data]
-    breakpoint()
+    packages = requirements.parse(Path("demo/requirements.txt"))
+    metadata = get_features(packages)
+    print(f"Extracted metadata for {len(metadata)} packages:")
     print(metadata)
