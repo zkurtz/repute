@@ -11,7 +11,7 @@ from pandahandler.indexes import Index
 from reputation import requirements
 from reputation.data import Package
 from reputation.pypi.cache import Cache
-from reputation.pypi.web import CACHE_DIR
+from reputation.pypi.web import CACHE_DIR, download_pypi_data
 
 INDEX = Index(
     names=[
@@ -124,7 +124,7 @@ def get_features(packages: list[Package]) -> pd.DataFrame:
     Returns: A table of pypi features indexed by package (name, version)
     """
     latest_packages = [Package(name=package.name, version="latest") for package in packages]
-
+    download_pypi_data(packages + latest_packages)
     df = pd.DataFrame([extract_values(item).dict for item in packages]).set_index("name").sort_index()
     df_latest = pd.DataFrame([extract_values(item).dict for item in latest_packages]).set_index("name").sort_index()
     assert df.index.equals(df_latest.index), "Index mismatch"
