@@ -8,8 +8,8 @@ import requests
 from attrs import field, frozen
 from tqdm import tqdm
 
-from reputation import paths, requirements
-from reputation.cache import CACHE_TIMESTAMP, Cache
+from repute import paths, requirements
+from repute.cache import CACHE_TIMESTAMP, Cache
 
 CACHE_DIR = paths.CACHE_DIR / "pypi"
 NOW = datetime.now()

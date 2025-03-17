@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from reputation.data import Package
+from repute.data import Package
 
 PIN_OPERATOR = "=="
 
@@ -45,7 +45,7 @@ def parse(filepath: Path) -> list[Package]:
 
 
 if __name__ == "__main__":
-    # Run example usage as `python reputation/requirements.py`
+    # Run example usage as `python repute/requirements.py`
     data = parse(Path("demo/requirements.txt"))
     df = pd.DataFrame([item.dict for item in data])  # .set_index("name")["version"]
     print(df)

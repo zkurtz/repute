@@ -1,10 +1,10 @@
-# reputation
+# repute
 
 Python package dependency analytics. Know what you depend on!
 
 **This is a pre-alpha release. The package is available on pypi only to reserve the name space.**
 
-`reputation` takes your `requirements.txt` and scans data sources on the web to output a columnar report of metrics that help you understand the health of your dependencies.
+`repute` takes your `requirements.txt` and scans data sources on the web to output a columnar report of metrics that help you understand the health of your dependencies.
 
 ## Quickstart guide
 
@@ -17,13 +17,13 @@ cd demo
 pip freeze --exclude-editable > requirements.txt
 ```
 
-Next, install reputation like `pip install reputation`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
+Next, install repute like `pip install repute`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
 
-Run `repute requirements.txt` to output a `reputation_report.csv` file with a report on the health of your dependencies. Upload this to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies. We've uploaded our demo example to a public spreadsheet on Google Sheets [here]() (coming soon ...).
+Run `repute requirements.txt` to output a `repute_report.csv` file with a report on the health of your dependencies. Upload this to a spreadsheet application and sort it on the various metrics columns to get a sense of the health of your dependencies. We've uploaded our demo example to a public spreadsheet on Google Sheets [here]() (coming soon ...).
 
-## Overview of `reputation` metrics
+## Overview of `repute` metrics
 
-First, hopefully it goes without saying none of these metrics in isolation are highly informative; defining and measuring reputation is a complex problem, so each of these metrics should be considered only starting point.
+First, hopefully it goes without saying none of these metrics in isolation are highly informative; defining and measuring repute is a complex problem, so each of these metrics should be considered only starting point.
 
 ### `version_age_days`
 
@@ -44,7 +44,7 @@ Coming soon ...
 ## Installation
 
 Installation:
-- We're [on pypi](https://pypi.org/project/reputation/), so `pip install reputation`.
+- We're [on pypi](https://pypi.org/project/repute/), so `pip install repute`.
 - Consider using the [simplest-possible virtual environment](https://gist.github.com/zkurtz/4c61572b03e667a7596a607706463543) if working directly on this repo.
 
 
