@@ -10,7 +10,7 @@ resolution-markers = [
 [manifest]
 members = [
     "demo",
-    "reputation",
+    "repute",
 ]
 
 [[package]]
@@ -1120,7 +1120,7 @@ wheels = [
 ]
 
 [[package]]
-name = "reputation"
+name = "repute"
 version = "0.0.2"
 source = { editable = "." }
 dependencies = [

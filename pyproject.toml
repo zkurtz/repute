@@ -1,5 +1,5 @@
 [project]
-name = "reputation"
+name = "repute"
 version = "0.0.2"
 description = "Python package dependency analytics. Know what you depend on!"
 authors = [{ name = "Zach Kurtz", email = "zkurtz@gmail.com" }]
@@ -25,10 +25,10 @@ dev = [
 ]
 
 [project.scripts]
-repute = "reputation.main:main"
+repute = "repute.main:main"
 
 [project.urls]
-Source = "https://github.com/zkurtz/reputation"
+Source = "https://github.com/zkurtz/repute"
 
 [tool.uv]
 package = true
@@ -57,7 +57,7 @@ build-backend = "hatchling.build"
 testpaths = ["tests",]
 
 [tool.pyright]
-include = ["reputation", "tests"]
+include = ["repute", "tests"]
 
 [tool.ruff]
 line-length = 120

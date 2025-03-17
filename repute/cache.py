@@ -6,7 +6,7 @@ from typing import Any
 from attrs import frozen
 from dummio import orjson as json_io
 
-from reputation import paths
+from repute import paths
 
 CACHE_TIMESTAMP = "cache_timestamp"
 

@@ -8,10 +8,10 @@ import pandas as pd
 from attrs import asdict, frozen
 from pandahandler.indexes import Index
 
-from reputation import requirements
-from reputation.cache import Cache
-from reputation.data import Package
-from reputation.pypi.web import CACHE_DIR, download_pypi_data
+from repute import requirements
+from repute.cache import Cache
+from repute.data import Package
+from repute.pypi.web import CACHE_DIR, download_pypi_data
 
 INDEX = Index(
     names=[
@@ -147,7 +147,7 @@ def get_features(packages: list[Package]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    # Example usage: `python reputation/pypi/analytics.py`
+    # Example usage: `python repute/pypi/analytics.py`
     packages = requirements.parse(Path("demo/requirements.txt"))
     metadata = get_features(packages)
     print(f"Extracted metadata for {len(metadata)} packages:")
