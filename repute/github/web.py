@@ -4,13 +4,14 @@ import time
 from datetime import datetime, timedelta
 from typing import Any
 
+import pandas as pd
 import requests
 from attrs import field, frozen
 from tqdm import tqdm
 
-from repute import paths, requirements
+from repute import paths
 from repute.cache import CACHE_TIMESTAMP, Cache
-from repute.data import GithubPackage
+from repute.github.data import GithubPackage
 
 CACHE_DIR = paths.CACHE_DIR / "github"
 NOW = datetime.now()
@@ -45,8 +46,7 @@ class Client:
         """Get the repository data from GitHub.
 
         Args:
-            repo_owner: Owner/organization of the repository
-            repo_name: Name of the repository
+            package: A GithubPackage object
         """
         # Build URL
         url = f"{self.base_url}/repos/{package.repo_owner}/{package.repo_name}"
@@ -54,17 +54,15 @@ class Client:
         # Make request
         response = self.session.get(url)
         response.raise_for_status()
-        data = response.json()
-        breakpoint()
-        return data
+        return response.json()
 
 
 def download_github_data(
-    packages: list[requirements.Package],
-    max_request_per_second: int = 10,
+    packages: list[GithubPackage],
+    max_request_per_second: int = 1,
     cache_duration_days: int = 30,
     github_token: str | None = None,
-) -> dict[str, dict[str, Any]]:
+) -> pd.DataFrame:
     """Get GitHub metadata for multiple packages.
 
     Args:
@@ -77,7 +75,7 @@ def download_github_data(
         Dictionary mapping package IDs to their GitHub data
     """
     client = Client(token=github_token)
-    results = {}
+    results = []
 
     for package in tqdm(packages, desc="Fetching GitHub star counts"):
         cache = Cache(directory=CACHE_DIR, package_id=str(package))
@@ -89,31 +87,30 @@ def download_github_data(
                 data = None
 
         if not data:
-            breakpoint()
-
             time.sleep(1 / max_request_per_second)
-            # try:
-            #     data = client(repo_owner=owner, repo_name=repo)
-            #     cache.save(data=data)
-            # except requests.HTTPError as e:
-            #     # Handle 404 and other errors gracefully
-            #     if e.response.status_code == 404:
-            #         print(f"Repository not found for package: {package.name}")
-            #     else:
-            #         print(f"Error fetching GitHub data for {package.name}: {e}")
-            #     continue
+            try:
+                data = client(package)
+                cache.save(data=data)
+            except requests.HTTPError as e:
+                # Handle 404 and other errors gracefully
+                if e.response.status_code == 404:
+                    print(f"Repository not found for package: {package.name}")
+                else:
+                    print(f"Error fetching GitHub data for {package.name}: {e}")
+                continue
 
         # Store the result with star count prominently available
-        results[str(package)] = {
+        values = {
             "name": package.name,
             "version": package.version,
-            "stars": data.get("stargazers_count", 0),
-            "forks": data.get("forks_count", 0),
-            "open_issues": data.get("open_issues_count", 0),
-            "watchers": data.get("watchers_count", 0),
+            "stars": data.get("stargazers_count"),
+            "forks": data.get("forks_count"),
+            "open_issues": data.get("open_issues_count"),
+            "watchers": data.get("watchers_count"),
             "updated_at": data.get("updated_at"),
             "github_url": data.get("html_url"),
             "description": data.get("description"),
         }
+        results.append(values)
 
-    return results
+    return pd.DataFrame(results)

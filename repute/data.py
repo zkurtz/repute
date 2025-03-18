@@ -1,6 +1,14 @@
 """Core data structures for python package metadata."""
 
 from attrs import asdict, frozen
+from pandahandler.indexes import Index
+
+INDEX = Index(
+    names=[
+        "name",
+        "version",
+    ]
+)
 
 
 @frozen

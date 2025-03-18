@@ -6,19 +6,11 @@ from typing import Any
 
 import pandas as pd
 from attrs import asdict, frozen
-from pandahandler.indexes import Index
 
 from repute import requirements
 from repute.cache import Cache
-from repute.data import Package
+from repute.data import INDEX, Package
 from repute.pypi.web import CACHE_DIR, download_pypi_data
-
-INDEX = Index(
-    names=[
-        "name",
-        "version",
-    ]
-)
 
 
 @frozen(kw_only=True)
