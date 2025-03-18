@@ -7,7 +7,7 @@ import pandas as pd
 from pandahandler.frames.joiners import safe_hstack
 
 from repute import requirements
-from repute.github import web as github_web
+from repute.github import analytics as gh_analytics
 from repute.pypi import analytics as pypi_analytics
 
 DEFAULT_OUTPUT_PATH = "repute_report.csv"
@@ -15,6 +15,11 @@ DEFAULT_OUTPUT_PATH = "repute_report.csv"
 PYPI_REPORT_COLS = [
     "version_age_days",
     "time_since_last_release_days",
+]
+GH_REPORT_COLS = [
+    "stars",
+    "watchers",
+    "github_url",
 ]
 
 
@@ -32,11 +37,14 @@ def main(input: str, *, output: str = DEFAULT_OUTPUT_PATH) -> None:
     assert isinstance(pypi_df, pd.DataFrame), "Expected a data frame"
 
     # Get more data from github:
-    # TODO
-    breakpoint()
-    github_web.download_github_data(packages)
+    gh_urls = pypi_df_detailed["github_url"]
+    assert isinstance(gh_urls, pd.Series), "Expected a series"
+    gh_df = gh_analytics.get_features(packages, urls=gh_urls)
+    gh_df = gh_df[GH_REPORT_COLS]
+    gh_df.columns = [f"gh:{col}" for col in gh_df.columns]
+    assert isinstance(gh_df, pd.DataFrame), "Expected a data frame"
 
-    df = safe_hstack([pypi_df])
+    df = safe_hstack([pypi_df, gh_df])
     df.to_csv(output)
     click.echo(f"Saved results to {output}")
 
