@@ -8,14 +8,7 @@ Python package dependency analytics. Know what you depend on!
 
 ## Quickstart guide
 
-The first step is to generate a `requirements.txt` file for your project. For illustration, we'll use the `demo` directory in this repo:
-```
-cd demo
-# create a virtual environment and activate it:
-# uv sync
-# source .venv/bin/activate
-pip freeze --exclude-editable > requirements.txt
-```
+The first step is to generate a `requirements.txt` file for your project. For illustration, follow `demo/README.md` directory in this repo.
 
 Next, install repute like `pip install repute`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
 

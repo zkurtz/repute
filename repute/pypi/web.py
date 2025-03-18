@@ -60,7 +60,7 @@ def download_pypi_data(
         cache_duration_days: Number of days to keep a package's cached data before refreshing it
     """
     client = Client()
-    for package in tqdm(packages, desc="Fetching PyPI package data"):
+    for package in tqdm(packages, desc="Fetching data from PyPI"):
         cache = Cache(directory=CACHE_DIR, package_id=str(package))
         data: dict[str, Any] | None = cache.load()
         if data is not None:

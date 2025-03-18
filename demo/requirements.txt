@@ -10,6 +10,8 @@ numpy==2.2.3
 packaging==24.2
 pyerfa==2.0.1.5
 pyyaml==6.0.2
+ruamel-yaml==0.18.10
+ruamel-yaml-clib==0.2.12
 setuptools==76.0.0
 sympy==1.13.1
 torch==2.6.0

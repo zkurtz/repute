@@ -77,7 +77,7 @@ def download_github_data(
     client = Client(token=github_token)
     results = []
 
-    for package in tqdm(packages, desc="Fetching GitHub star counts"):
+    for package in tqdm(packages, desc="Fetching data from GitHub"):
         cache = Cache(directory=CACHE_DIR, package_id=str(package))
         data: dict[str, Any] | None = cache.load()
 
