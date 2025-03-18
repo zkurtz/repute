@@ -4,7 +4,6 @@ from pathlib import Path
 
 import click
 import pandas as pd
-from pandahandler.frames.joiners import safe_hstack
 
 from repute import requirements
 from repute.github import analytics as gh_analytics
@@ -36,15 +35,15 @@ def main(input: str, *, output: str = DEFAULT_OUTPUT_PATH) -> None:
     pypi_df.columns = [f"pypi:{col}" for col in pypi_df.columns]
     assert isinstance(pypi_df, pd.DataFrame), "Expected a data frame"
 
-    # Get more data from github:
-    gh_urls = pypi_df_detailed["github_url"]
+    # Get more data from github, for packages that have a github URL listed on PyPI:
+    gh_urls = pypi_df_detailed["github_url"].dropna()
     assert isinstance(gh_urls, pd.Series), "Expected a series"
-    gh_df = gh_analytics.get_features(packages, urls=gh_urls)
+    gh_df = gh_analytics.get_features(urls=gh_urls)
     gh_df = gh_df[GH_REPORT_COLS]
     gh_df.columns = [f"gh:{col}" for col in gh_df.columns]
     assert isinstance(gh_df, pd.DataFrame), "Expected a data frame"
 
-    df = safe_hstack([pypi_df, gh_df])
+    df = pypi_df.merge(gh_df, left_index=True, right_index=True, how="left")
     df.to_csv(output)
     click.echo(f"Saved results to {output}")
 
