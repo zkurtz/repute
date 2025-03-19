@@ -9,11 +9,11 @@ import requests
 from attrs import field, frozen
 from tqdm import tqdm
 
-from repute import paths
+from repute import constants
 from repute.cache import CACHE_TIMESTAMP, Cache
 from repute.github.data import GithubPackage
 
-CACHE_DIR = paths.CACHE_DIR / "github"
+CACHE_DIR = constants.CACHE_DIR / "github"
 NOW = datetime.now()
 
 

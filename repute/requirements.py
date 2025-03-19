@@ -1,5 +1,6 @@
 """Tools to parse a requirements file."""
 
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -22,8 +23,16 @@ def parseline(line: str) -> Package | None:
         ValueError: If the line doesn't contain a package name and version
     """
     line = line.strip()
-    if not line or line.startswith("#"):
+    if not line:
         return None
+    if line.startswith("#"):
+        return None
+    if line.startswith("-e"):
+        warnings.warn(f"ignoring editable installation: '{line}'")
+        return None
+    if line.startswith("-r"):
+        raise ValueError(f"requirements file inclusions are not supported: '{line}'")
+
     if PIN_OPERATOR in line:
         package_name, version = line.split(PIN_OPERATOR)
         return Package(name=package_name, version=version)

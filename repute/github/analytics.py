@@ -2,11 +2,11 @@
 
 import pandas as pd
 
+from repute.constants import GH_URL_BASE
 from repute.data import INDEX
 from repute.github.data import GithubPackage
 from repute.github.web import download_github_data
 
-GH_URL_BASE = "github.com/"
 SEP = "/"
 
 
