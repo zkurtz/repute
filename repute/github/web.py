@@ -59,7 +59,7 @@ class Client:
 
 def download_github_data(
     packages: list[GithubPackage],
-    max_request_per_second: int = 1,
+    max_requests_per_minute: int = 30,
     cache_duration_days: int = 30,
     github_token: str | None = None,
 ) -> pd.DataFrame:
@@ -67,7 +67,7 @@ def download_github_data(
 
     Args:
         packages: A list of Package objects
-        max_request_per_second: Maximum number of requests per second, to avoid GitHub API rate limits
+        max_requests_per_minute: Maximum number of requests per second, to avoid GitHub API rate limits
         cache_duration_days: Number of days to keep cached data before refreshing
         github_token: Optional GitHub API token to increase rate limits
 
@@ -87,14 +87,14 @@ def download_github_data(
                 data = None
 
         if not data:
-            time.sleep(1 / max_request_per_second)
+            time.sleep(60 / max_requests_per_minute)
             try:
                 data = client(package)
                 cache.save(data=data)
             except requests.HTTPError as e:
                 # Handle 404 and other errors gracefully
                 if e.response.status_code == 404:
-                    print(f"Repository not found for package: {package.name}")
+                    print(f"404 response from github for {package.name} with url {package.url}")
                 else:
                     print(f"Error fetching GitHub data for {package.name}: {e}")
                 continue
