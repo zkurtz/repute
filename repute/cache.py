@@ -6,7 +6,7 @@ from typing import Any
 from attrs import frozen
 from dummio import orjson as json_io
 
-from repute import paths
+from repute import constants
 
 CACHE_TIMESTAMP = "cache_timestamp"
 
@@ -15,7 +15,7 @@ CACHE_TIMESTAMP = "cache_timestamp"
 class Cache:
     """IO wrapper for storing data or a single package."""
 
-    directory: paths.Path
+    directory: constants.Path
     package_id: str
 
     def __attrs_post_init__(self):
@@ -23,7 +23,7 @@ class Cache:
         self.directory.mkdir(parents=True, exist_ok=True)
 
     @property
-    def path(self) -> paths.Path:
+    def path(self) -> constants.Path:
         """Path to the cache file."""
         return self.directory / f"{self.package_id}.json"
 

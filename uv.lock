@@ -277,6 +277,7 @@ source = { virtual = "demo" }
 dependencies = [
     { name = "astropy", version = "6.1.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "astropy", version = "7.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "attrs" },
     { name = "ruamel-yaml" },
     { name = "torch" },
 ]
@@ -284,6 +285,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "astropy", specifier = ">=6.1.7" },
+    { name = "attrs", specifier = ">=25.3.0" },
     { name = "ruamel-yaml", specifier = ">=0.18.10" },
     { name = "torch", specifier = ">=2.6.0" },
 ]
@@ -1123,7 +1125,7 @@ wheels = [
 
 [[package]]
 name = "repute"
-version = "0.0.2"
+version = "0.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
