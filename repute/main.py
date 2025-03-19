@@ -9,7 +9,7 @@ from repute import requirements
 from repute.github import analytics as gh_analytics
 from repute.pypi import analytics as pypi_analytics
 
-DEFAULT_OUTPUT_PATH = "repute_report.csv"
+DEFAULT_OUTPUT_PATH = "repute.csv"
 
 PYPI_REPORT_COLS = [
     "version_age_days",
