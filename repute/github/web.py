@@ -24,7 +24,7 @@ class Client:
     Attributes:
         session: Requests session to use for API requests
         base_url: Base URL for the GitHub API
-        token: GitHub API token for authentication (optional)
+        token: GitHub API token for authentication, if available
     """
 
     session: requests.Session = field(factory=requests.Session)
@@ -60,19 +60,17 @@ class Client:
 def download_github_data(
     packages: list[GithubPackage],
     cache_duration_days: int = 30,
-    github_token: str | None = None,
 ) -> pd.DataFrame:
     """Get GitHub metadata for multiple packages.
 
     Args:
         packages: A list of Package objects
         cache_duration_days: Number of days to keep cached data before refreshing
-        github_token: Optional GitHub API token to increase rate limits
 
     Returns:
         Dictionary mapping package IDs to their GitHub data
     """
-    client = Client(token=github_token)
+    client = Client()
     results = []
 
     for package in tqdm(packages, desc="Fetching data from GitHub"):

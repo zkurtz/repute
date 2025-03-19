@@ -9,4 +9,7 @@ dependencies = [
     "torch>=2.6.0",
     "ruamel-yaml>=0.18.10",
     "attrs>=25.3.0",
+    "jsonschema-specifications>=2024.10.1",
+    "pydantic>=2.10.6",
+    "starlette>=0.46.1",
 ]
