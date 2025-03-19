@@ -9,8 +9,8 @@ from attrs import asdict, frozen
 
 from repute import requirements
 from repute.cache import Cache
-from repute.constants import GH_URL_BASE
 from repute.data import INDEX, Package
+from repute.pypi.github import infer_github_url
 from repute.pypi.web import CACHE_DIR, download_pypi_data
 
 
@@ -61,46 +61,6 @@ def extract_release_timestamp(package: Package, data: dict[str, Any]) -> datetim
     return datetime.fromisoformat(release_timestamp_str)
 
 
-def get_github_url(*, name: str, info: dict[str, Any]) -> str | None:
-    """Get the GitHub URL from the PyPI metadata.
-
-    Args:
-        name: Name of the package
-        info: PyPI metadata for the package
-    """
-
-    # Try to find the GitHub repo URL in project_urls
-    urls = info.get("project_urls", {}) or {}
-    urls = {key.lower(): value for key, value in urls.items()}
-    url_key_precedence = [
-        "github",
-        "source",
-        "repository",
-        "code",
-        "homepage",
-        "download",
-        "source code",
-        "repository",
-    ]
-    for url_key in url_key_precedence:
-        url = urls.pop(url_key, None)
-        if url and GH_URL_BASE in url:
-            return url
-
-    # Check remaining project_urls for obvious GitHub URLs
-    for url in urls.values():
-        if GH_URL_BASE in url and name in url:
-            return url
-
-    # If no GitHub URL found in project_urls, check home_page
-    home_page = info.get("home_page")
-    if home_page:
-        if GH_URL_BASE in home_page.lower():
-            return home_page
-
-    return None
-
-
 def extract_values(package: Package) -> Data:
     """Extract values of interest from the cached pypi data.
 
@@ -123,7 +83,7 @@ def extract_values(package: Package) -> Data:
         version=package.version,
         record_timestamp=datetime.now(),
         release_timestamp=release_timestamp,
-        github_url=get_github_url(name=package.name, info=info),
+        github_url=infer_github_url(name=package.name, info=info),
         home_page=info.get("home_page"),
         author=info.get("author"),
         author_email=info.get("author_email"),

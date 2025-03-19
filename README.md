@@ -1,10 +1,6 @@
 # repute
 
-Python package dependency analytics. Know what you depend on!
-
-**This is a pre-alpha release. The package is available on pypi only to reserve the name space.**
-
-`repute` takes your `requirements.txt` and scans data sources on the web to output a columnar report of metrics that help you understand the health of your dependencies.
+Are your python project dependencies of good repute? Now you can run `repute` to describe the health of your dependencies based on data sources from the web.
 
 ## Quickstart guide
 
@@ -19,26 +15,26 @@ $ repute demo/requirements.txt
 Fetching data from PyPI: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 58/58 [00:07<00:00,  7.41it/s]
 Fetching data from GitHub: 100%|██████████████████████████████████████████████████████████████████████████████████████████| 27/27 [00:02<00:00,  9.47it/s]
 
-Summarizing 29 dependencies:
+Summarizing 56 dependencies:
 
-Here are your oldest dependencies:
-                             pypi:version_age_days
-    name            version
-    annotated-types 0.7.0                      302
-    sniffio         1.3.1                      387
-    mpmath          1.3.0                      742
+Oldest dependencies:
+                                  pypi:version_age_days
+    name                 version
+    jsonpatch            1.33                       641
+    azure-datalake-store 0.0.53                     678
+    mpmath               1.3.0                      743
 
-The following packages could not be found on GitHub:
+Dependencies that we could not locate on GitHub:
                    name  version
     0       ruamel-yaml  0.18.10
     1  ruamel-yaml-clib   0.2.12
 
-Here are your least popular dependencies in terms of GitHub stars:
+Dependencies with fewest GitHub stars:
                                                    gh:stars
     name                      version
-    astropy-iers-data         0.2025.3.10.0.29.26         3
+    astropy-iers-data         0.2025.3.17.0.34.53         3
     jsonschema-specifications 2024.10.1                  11
-    pyerfa                    2.0.1.5                    37
+    propcache                 0.3.0                      17
 
 See repute.csv for detailed results.
 ```

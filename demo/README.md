@@ -12,3 +12,9 @@ uv sync --active
 ```
 
 Generate the requirement.txt file with `uv pip freeze > requirements.txt`.
+
+Copy-paste this to the end of `requirements.txt`:
+```
+# `repute` will ignore any editable installations
+-e file:///my/repo/path
+```

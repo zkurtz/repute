@@ -33,6 +33,11 @@ def to_package(url: str, **kwargs) -> GithubPackage:
     parts = body.split(SEP)
     repo_owner = parts[0]
     repo_name = parts[1]
+
+    # remove any `.git` suffix on the repo name:
+    if repo_name.endswith(".git"):
+        repo_name = repo_name[:-4]
+
     return GithubPackage(
         url=url,
         repo_owner=repo_owner,
