@@ -1,6 +1,6 @@
 """Tools to fetch star counts and other metadata from GitHub."""
 
-import time
+import os
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -29,7 +29,7 @@ class Client:
 
     session: requests.Session = field(factory=requests.Session)
     base_url: str = "https://api.github.com"
-    token: str | None = None
+    token: str | None = os.getenv("GITHUB_TOKEN")
 
     def __attrs_post_init__(self) -> None:
         """Set up the session with proper headers for GitHub API."""
@@ -59,7 +59,6 @@ class Client:
 
 def download_github_data(
     packages: list[GithubPackage],
-    max_requests_per_minute: int = 30,
     cache_duration_days: int = 30,
     github_token: str | None = None,
 ) -> pd.DataFrame:
@@ -67,7 +66,6 @@ def download_github_data(
 
     Args:
         packages: A list of Package objects
-        max_requests_per_minute: Maximum number of requests per second, to avoid GitHub API rate limits
         cache_duration_days: Number of days to keep cached data before refreshing
         github_token: Optional GitHub API token to increase rate limits
 
@@ -87,16 +85,21 @@ def download_github_data(
                 data = None
 
         if not data:
-            time.sleep(60 / max_requests_per_minute)
             try:
                 data = client(package)
                 cache.save(data=data)
-            except requests.HTTPError as e:
-                # Handle 404 and other errors gracefully
-                if e.response.status_code == 404:
+            except requests.HTTPError as err:
+                if err.response.status_code == 403:
+                    msg = (
+                        "Github API rate limit exceeded. Since responses are cached, just wait an hour and try again. "
+                        "Or you may set the GITHUB_TOKEN environment variable to dramatically increase rate limits. "
+                        "`repute` will automatically use GITHUB_TOKEN if it is set. "
+                    )
+                    raise RuntimeError(msg) from err
+                if err.response.status_code == 404:
                     print(f"404 response from github for {package.name} with url {package.url}")
                 else:
-                    print(f"Error fetching GitHub data for {package.name}: {e}")
+                    print(f"Error fetching GitHub data for {package.name}: {err}")
                 continue
 
         # Store the result with star count prominently available
