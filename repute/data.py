@@ -9,6 +9,7 @@ INDEX = Index(
         "version",
     ]
 )
+NAME_INDEX = Index(names=["name"], require_unique=False)
 
 
 @frozen
@@ -26,3 +27,10 @@ class Package:
     def dict(self) -> dict[str, str]:
         """Dictionary representation of the package."""
         return asdict(self)
+
+
+# Known github repo URLs index by package name
+KNOWN_GITHUB_REPOS = {
+    "adlfs": "github.com/fsspec/adlfs",
+    "msal-extensions": "github.com/AzureAD/microsoft-authentication-extensions-for-python",
+}

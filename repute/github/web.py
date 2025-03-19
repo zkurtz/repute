@@ -76,7 +76,6 @@ def download_github_data(
     for package in tqdm(packages, desc="Fetching data from GitHub"):
         cache = Cache(directory=CACHE_DIR, package_id=str(package))
         data: dict[str, Any] | None = cache.load()
-
         if data is not None:
             cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
             if cache_timestamp < NOW - timedelta(days=cache_duration_days):
