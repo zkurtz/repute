@@ -1,6 +1,6 @@
 [project]
 name = "repute"
-version = "0.1.2"
+version = "0.1.3"
 description = "Python package dependency analytics. Know what you depend on!"
 authors = [{ name = "Zach Kurtz", email = "zkurtz@gmail.com" }]
 readme = "README.md"
@@ -11,6 +11,7 @@ dependencies = [
     "orjson>=3.10.15",
     "pandahandler>=0.7.4",
     "pandas >=1.5.0",
+    "pypistats>=1.8.0",
     "requests>=2.32.3",
     "tqdm>=4.67.1",
 ]
@@ -37,7 +38,7 @@ package = true
 members = ["demo"]
 
 [tool.bumpversion]
-current_version = "0.1.2"
+current_version = "0.1.3"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 tag = false

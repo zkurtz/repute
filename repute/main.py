@@ -10,6 +10,7 @@ from repute import data, requirements
 from repute.analysis import summarize
 from repute.github import analytics as gh_analytics
 from repute.pypi import analytics as pypi_analytics
+from repute.pypi.stats import download_pypi_stats
 
 DEFAULT_OUTPUT_PATH = "repute.csv"
 GITHUB_URL = "github_url"
@@ -29,6 +30,13 @@ def load_pypi_data(packages: list[data.Package]) -> pd.DataFrame:
     """Load PyPI data for a list of packages."""
     df_detailed = pypi_analytics.get_features(packages)
     df = df_detailed[PYPI_REPORT_COLS + [GITHUB_URL]].copy()
+    assert isinstance(df, pd.DataFrame), "Expected a data frame"
+
+    # Get pypistats package download counts
+    df = data.NAME_INDEX(df)
+    df["recent_avg_downloads_per_day"] = download_pypi_stats(packages)
+    df = data.INDEX(df)
+
     df.columns = [f"pypi:{col}" for col in df.columns]
     assert isinstance(df, pd.DataFrame), "Expected a data frame"
     return df
