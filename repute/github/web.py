@@ -59,7 +59,7 @@ class Client:
 
 def download_github_data(
     packages: list[GithubPackage],
-    cache_duration_days: int = 30,
+    cache_duration_days: int = constants.DEFAULT_CACHE_DURATION_DAYS,
 ) -> pd.DataFrame:
     """Get GitHub metadata for multiple packages.
 

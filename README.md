@@ -12,29 +12,36 @@ Are your python project dependencies of good repute? Now you can run `repute` to
 $ repute demo/requirements.txt
 /Users/me/Desktop/mycloud/repos/repute/repute/requirements.py:31: UserWarning: ignoring editable installation: '-e file:///my/repo/path'
   warnings.warn(f"ignoring editable installation: '{line}'")
-Fetching data from PyPI: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 58/58 [00:07<00:00,  7.41it/s]
-Fetching data from GitHub: 100%|██████████████████████████████████████████████████████████████████████████████████████████| 27/27 [00:02<00:00,  9.47it/s]
+Fetching data from PyPI: 100%|███████████████████████████████████████████████████████████████████████████████████████| 112/112
+Fetching download stats from PyPI: 100%|██████████████████████████████████████████████████████████████████████████████| 56/56
+Fetching data from GitHub: 100%|███████████████████████████████████████████████████████████████████████████████████████| 54/54
 
 Summarizing 56 dependencies:
 
 Oldest dependencies:
-                                  pypi:version_age_days
+                                  pypi:version_age_days  pypi:time_since_last_release_days
     name                 version
-    jsonpatch            1.33                       641
-    azure-datalake-store 0.0.53                     678
-    mpmath               1.3.0                      743
+    jsonpatch            1.33                       642                                642
+    azure-datalake-store 0.0.53                     679                                679
+    mpmath               1.3.0                      744                                744
 
 Dependencies that we could not locate on GitHub:
-                   name  version
-    0       ruamel-yaml  0.18.10
-    1  ruamel-yaml-clib   0.2.12
+    ruamel-yaml
+    ruamel-yaml-clib
 
 Dependencies with fewest GitHub stars:
-                                                   gh:stars
-    name                      version
-    astropy-iers-data         0.2025.3.17.0.34.53         3
-    jsonschema-specifications 2024.10.1                  11
-    propcache                 0.3.0                      17
+                               gh:stars
+    name
+    astropy-iers-data                 3
+    jsonschema-specifications        11
+    propcache                        17
+
+Dependencies with fewest recent downloads:
+                       pypi:recent_avg_downloads_per_day
+    name
+    astropy-iers-data                            2274182
+    pyerfa                                       6626394
+    astropy                                      7289296
 
 See repute.csv for detailed results.
 ```

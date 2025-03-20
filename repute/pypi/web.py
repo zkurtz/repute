@@ -50,7 +50,7 @@ class Client:
 def download_pypi_data(
     packages: list[requirements.Package],
     max_request_per_second: int = 10,
-    cache_duration_days: int = 30,
+    cache_duration_days: int = constants.DEFAULT_CACHE_DURATION_DAYS,
 ) -> None:
     """Get metadata for multiple packages.
 
