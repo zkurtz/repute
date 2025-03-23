@@ -1,43 +1,73 @@
 """Wrap pypistats package to access pypi package download stats."""
 
 import json
-import time
 from datetime import datetime, timedelta
-from typing import Any
 
 import pandas as pd
 import pypistats
-from tqdm import tqdm
+from attrs import define, field, frozen
 
 from repute import constants
-from repute.cache import CACHE_TIMESTAMP, Cache
+from repute.cache import CachedClient
 from repute.data import Package
 
 LOOKBACK_DAYS = 90
 DATE_FMT = "%Y-%m-%d"
 CACHE_DIR = constants.CACHE_DIR / "pypi_stats"
-NOW = datetime.now()
 
 
-def download_recent_download_counts(package: Package, lookback_days: int = LOOKBACK_DAYS) -> dict[str, int]:
-    """Download the number of PYPI downloads (without mirrors) for a package in the last lookback_days days."""
-    end_date = datetime.now().strftime(DATE_FMT)
-    start_date = (datetime.now() - timedelta(days=lookback_days)).strftime(DATE_FMT)
-    downloads_str = pypistats.overall(
-        package.name,
-        mirrors=False,
-        start_date=start_date,
-        end_date=end_date,
-        total="all",
-        format="json",
-    )
-    assert isinstance(downloads_str, str), "Expected a string"
-    downloads = json.loads(downloads_str)
-    data = downloads["data"]
-    assert len(data) == 1, "Expected a single data entry"
-    entry = data[0]
-    assert "downloads" in entry, "Expected 'downloads' key in data entry"
-    return entry
+@frozen
+class Client:
+    """Client for interacting with the PyPI stats API."""
+
+    def __call__(self, package: Package, lookback_days: int = LOOKBACK_DAYS) -> dict[str, int]:
+        """Get download stats for a package.
+
+        Args:
+            package: Package to get stats for
+            lookback_days: Number of days to look back
+
+        Returns:
+            Dictionary containing download stats
+        """
+        end_date = datetime.now().strftime(DATE_FMT)
+        start_date = (datetime.now() - timedelta(days=lookback_days)).strftime(DATE_FMT)
+        downloads_str = pypistats.overall(
+            package.name,
+            mirrors=False,
+            start_date=start_date,
+            end_date=end_date,
+            total="all",
+            format="json",
+        )
+        assert isinstance(downloads_str, str), "Expected a string"
+        downloads = json.loads(downloads_str)
+        data = downloads["data"]
+        assert len(data) == 1, "Expected a single data entry"
+        entry = data[0]
+        assert "downloads" in entry, "Expected 'downloads' key in data entry"
+        return entry
+
+
+@define
+class CachedPyPIStatsClient(CachedClient):
+    """Client for interacting with the PyPI stats API with caching."""
+
+    client: Client = field(factory=Client)
+
+    def get_package_data(self, package: Package) -> dict[str, int]:
+        """Get download stats for a package.
+
+        Args:
+            package: Package to get stats for
+
+        Returns:
+            Dictionary containing download stats
+        """
+        return self.get_cached_data(
+            package_id=str(package),
+            fetch_func=lambda: self.client(package),
+        )
 
 
 def download_pypi_stats(
@@ -54,17 +84,14 @@ def download_pypi_stats(
 
     Returns: A pandas series of download counts indexed by package name
     """
+    client = CachedPyPIStatsClient(
+        cache_dir=CACHE_DIR,
+        max_request_per_second=max_request_per_second,
+        cache_duration_days=cache_duration_days,
+    )
+
     results = {}
-    for package in tqdm(packages, desc="Fetching download stats from PyPI"):
-        cache = Cache(directory=CACHE_DIR, package_id=str(package))
-        data: dict[str, Any] | None = cache.load()
-        if data is not None:
-            cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
-            if cache_timestamp < NOW - timedelta(days=cache_duration_days):
-                data = None
-        if not data:
-            time.sleep(1 / max_request_per_second)
-            data = download_recent_download_counts(package)
-            cache.save(data=data)
+    for package in packages:
+        data = client.get_package_data(package)
         results[package.name] = data["downloads"]
     return pd.Series(results)
