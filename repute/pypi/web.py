@@ -1,15 +1,13 @@
 """Tools to fetch metadata from PyPI."""
 
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 import requests
-from attrs import field, frozen
-from tqdm import tqdm
+from attrs import define, field, frozen
 
 from repute import constants, requirements
-from repute.cache import CACHE_TIMESTAMP, Cache
+from repute.cache import CachedClient
 
 CACHE_DIR = constants.CACHE_DIR / "pypi"
 NOW = datetime.now()
@@ -47,6 +45,27 @@ class Client:
         return data
 
 
+@define
+class CachedPyPIClient(CachedClient):
+    """Client for interacting with the PyPI API with caching."""
+
+    client: Client = field(factory=Client)
+
+    def get_package_data(self, package: requirements.Package) -> dict[str, Any]:
+        """Get data for a package from PyPI.
+
+        Args:
+            package: Package to fetch data for
+
+        Returns:
+            The package data from PyPI
+        """
+        return self.get_cached_data(
+            package_id=str(package),
+            fetch_func=lambda: self.client(package_name=package.name, version=package.version),
+        )
+
+
 def download_pypi_data(
     packages: list[requirements.Package],
     max_request_per_second: int = 10,
@@ -59,15 +78,11 @@ def download_pypi_data(
         max_request_per_second: Maximum number of requests to make per second, to avoid negative attention from PyPI
         cache_duration_days: Number of days to keep a package's cached data before refreshing it
     """
-    client = Client()
-    for package in tqdm(packages, desc="Fetching data from PyPI"):
-        cache = Cache(directory=CACHE_DIR, package_id=str(package))
-        data: dict[str, Any] | None = cache.load()
-        if data is not None:
-            cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
-            if cache_timestamp < NOW - timedelta(days=cache_duration_days):
-                data = None
-        if not data:
-            time.sleep(1 / max_request_per_second)
-            data = client(package_name=package.name, version=package.version)
-            cache.save(data=data)
+    client = CachedPyPIClient(
+        cache_dir=CACHE_DIR,
+        max_request_per_second=max_request_per_second,
+        cache_duration_days=cache_duration_days,
+    )
+
+    for package in packages:
+        client.get_package_data(package)

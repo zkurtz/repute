@@ -1,20 +1,17 @@
 """Tools to fetch star counts and other metadata from GitHub."""
 
 import os
-from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
 import requests
-from attrs import field, frozen
-from tqdm import tqdm
+from attrs import define, field, frozen
 
 from repute import constants
-from repute.cache import CACHE_TIMESTAMP, Cache
+from repute.cache import CachedClient
 from repute.github.data import GithubPackage
 
 CACHE_DIR = constants.CACHE_DIR / "github"
-NOW = datetime.now()
 
 
 @frozen
@@ -57,6 +54,27 @@ class Client:
         return response.json()
 
 
+@define
+class CachedGithubClient(CachedClient):
+    """Client for interacting with the GitHub API with caching."""
+
+    client: Client = field(factory=Client)
+
+    def get_package_data(self, package: GithubPackage) -> dict[str, Any]:
+        """Get data for a package from GitHub.
+
+        Args:
+            package: Package to fetch data for
+
+        Returns:
+            The package data from GitHub
+        """
+        return self.get_cached_data(
+            package_id=str(package),
+            fetch_func=lambda: self.client(package),
+        )
+
+
 def download_github_data(
     packages: list[GithubPackage],
     cache_duration_days: int = constants.DEFAULT_CACHE_DURATION_DAYS,
@@ -70,47 +88,40 @@ def download_github_data(
     Returns:
         Dictionary mapping package IDs to their GitHub data
     """
-    client = Client()
+    client = CachedGithubClient(
+        cache_dir=CACHE_DIR,
+        cache_duration_days=cache_duration_days,
+    )
     results = []
 
-    for package in tqdm(packages, desc="Fetching data from GitHub"):
-        cache = Cache(directory=CACHE_DIR, package_id=str(package))
-        data: dict[str, Any] | None = cache.load()
-        if data is not None:
-            cache_timestamp = datetime.fromisoformat(data[CACHE_TIMESTAMP])
-            if cache_timestamp < NOW - timedelta(days=cache_duration_days):
-                data = None
-
-        if not data:
-            try:
-                data = client(package)
-                cache.save(data=data)
-            except requests.HTTPError as err:
-                if err.response.status_code == 403:
-                    msg = (
-                        "Github API rate limit exceeded. Since responses are cached, just wait an hour and try again. "
-                        "Or you may set the GITHUB_TOKEN environment variable to dramatically increase rate limits. "
-                        "`repute` will automatically use GITHUB_TOKEN if it is set. "
-                    )
-                    raise RuntimeError(msg) from err
-                if err.response.status_code == 404:
-                    print(f"404 response from github for {package.name} with url {package.url}")
-                else:
-                    print(f"Error fetching GitHub data for {package.name}: {err}")
-                continue
-
-        # Store the result with star count prominently available
-        values = {
-            "name": package.name,
-            "version": package.version,
-            "stars": data.get("stargazers_count"),
-            "forks": data.get("forks_count"),
-            "open_issues": data.get("open_issues_count"),
-            "watchers": data.get("watchers_count"),
-            "updated_at": data.get("updated_at"),
-            "github_url": data.get("html_url"),
-            "description": data.get("description"),
-        }
-        results.append(values)
+    for package in packages:
+        try:
+            data = client.get_package_data(package)
+            # Store the result with star count prominently available
+            values = {
+                "name": package.name,
+                "version": package.version,
+                "stars": data.get("stargazers_count"),
+                "forks": data.get("forks_count"),
+                "open_issues": data.get("open_issues_count"),
+                "watchers": data.get("watchers_count"),
+                "updated_at": data.get("updated_at"),
+                "github_url": data.get("html_url"),
+                "description": data.get("description"),
+            }
+            results.append(values)
+        except requests.HTTPError as err:
+            if err.response.status_code == 403:
+                msg = (
+                    "Github API rate limit exceeded. Since responses are cached, just wait an hour and try again. "
+                    "Or you may set the GITHUB_TOKEN environment variable to dramatically increase rate limits. "
+                    "`repute` will automatically use GITHUB_TOKEN if it is set. "
+                )
+                raise RuntimeError(msg) from err
+            if err.response.status_code == 404:
+                print(f"404 response from github for {package.name} with url {package.url}")
+            else:
+                print(f"Error fetching GitHub data for {package.name}: {err}")
+            continue
 
     return pd.DataFrame(results)
