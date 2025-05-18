@@ -4,11 +4,26 @@ import textwrap
 
 import click
 import pandas as pd
+from sigfig import round as sround
 
 from repute import data
 
 
+def _soft_sigfig_fmt(num: float | int, sigfigs=2) -> str:
+    """Format a number with a given number of significant figures.
+
+    Any rounding applies only to decimal digits, not to the number of digits in the integer part.
+    """
+    num_str = str(num)
+    num_nondecimal_digits = len(num_str.split(".")[0])
+    ndigits = max(sigfigs, num_nondecimal_digits)
+    return sround(num_str, sigfigs=ndigits, spacer=",")
+
+
 def _format_table(df: pd.DataFrame) -> str:
+    # format numeric columns with 2 significant figures
+    for col in df.select_dtypes(include=["float64", "int64"]).columns:
+        df[col] = [_soft_sigfig_fmt(item) for item in df[col]]
     return textwrap.indent(str(df), "    ")
 
 
