@@ -52,7 +52,7 @@ def download_pypi_stats(
         max_request_per_second: Maximum number of requests to make per second, to avoid negative attention from PyPI
         cache_duration_days: Number of days to keep a package's cached data before refreshing it
 
-    Returns: A pandas series of download counts indexed by package name
+    Returns: A pandas series of average daily download counts, indexed by package name
     """
     results = {}
     for package in tqdm(packages, desc="Fetching download stats from PyPI"):
@@ -66,5 +66,5 @@ def download_pypi_stats(
             time.sleep(1 / max_request_per_second)
             data = download_recent_download_counts(package)
             cache.save(data=data)
-        results[package.name] = data["downloads"]
-    return pd.Series(results)
+        results[package.name] = data["downloads"] / LOOKBACK_DAYS
+    return pd.Series(results, name=f"avg_daily_downloads_last_{LOOKBACK_DAYS}_days")
