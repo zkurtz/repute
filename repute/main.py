@@ -48,7 +48,8 @@ def adjust_github_urls(from_pypi: pd.Series) -> pd.DataFrame:
     df = data.NAME_INDEX(df)
     df = df.rename(columns={f"pypi:{GITHUB_URL}": GITHUB_URL})
     known_repos_series = pd.Series(data.KNOWN_GITHUB_REPOS)
-    df.loc[known_repos_series.index, GITHUB_URL] = known_repos_series
+    relevant_known_idx = known_repos_series.index.intersection(df.index)
+    df.loc[relevant_known_idx, GITHUB_URL] = known_repos_series
     return data.INDEX(df)
 
 
