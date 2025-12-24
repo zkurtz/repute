@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "repute"
-version = "0.1.3"
+version = "0.1.4"
 description = "Python package dependency analytics. Know what you depend on!"
 readme = "README.md"
 authors = [ { name = "Zach Kurtz", email = "zkurtz@gmail.com" } ]

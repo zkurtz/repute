@@ -1883,7 +1883,7 @@ wheels = [
 
 [[package]]
 name = "repute"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
@@ -1908,20 +1908,20 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "attrs", specifier = ">=25.3.0" },
-    { name = "click", specifier = ">=8.0.0" },
-    { name = "dummio", specifier = ">=1.10.0" },
+    { name = "attrs", specifier = ">=25.3" },
+    { name = "click", specifier = ">=8" },
+    { name = "dummio", specifier = ">=1.10" },
     { name = "orjson", specifier = ">=3.10.15" },
     { name = "pandahandler", specifier = ">=0.7.4" },
-    { name = "pandas", specifier = ">=1.5.0" },
-    { name = "pypistats", specifier = ">=1.8.0" },
+    { name = "pandas", specifier = ">=1.5" },
+    { name = "pypistats", specifier = ">=1.8" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "bump-my-version", specifier = ">=0.30.0" },
+    { name = "bump-my-version", specifier = ">=0.30" },
     { name = "pre-commit", specifier = "==4.0.1" },
     { name = "pytest", specifier = "==8.3.4" },
     { name = "ruff", specifier = "==0.8.5" },
