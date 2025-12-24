@@ -6,13 +6,20 @@ repos:
     - id: end-of-file-fixer
     - id: check-yaml
     - id: check-added-large-files
+- repo: https://github.com/tox-dev/pyproject-fmt
+  rev: v2.11.1
+  hooks:
+    - id: pyproject-fmt
+      args: [--no-generate-python-version-classifiers]
 - repo: local
   hooks:
-    - id: pyright
-      name: type checking (pyright)
-      entry: pyright
+    - id: ty
+      name: type checking (ty)
+      entry: ty check
       language: system
       types: [python]
+      pass_filenames: false
+      always_run: true
     - id: ruff-format
       name: formatting (ruff)
       entry: ruff

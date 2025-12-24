@@ -31,7 +31,7 @@ def _format_list(series: pd.Series) -> str:
     return textwrap.indent("\n".join(series), "    ")
 
 
-def summarize(df: pd.DataFrame) -> None:
+def summarize(df: pd.DataFrame, max_old_deps: int = 3) -> None:
     """Generate a summary report."""
     n_deps = len(df)
     click.echo(f"\nSummarizing {n_deps} dependencies:")
@@ -42,7 +42,9 @@ def summarize(df: pd.DataFrame) -> None:
         age_col,
         "pypi:time_since_last_release_days",
     ]
-    old_deps = df[cols].sort_values(age_col).tail(min(3, n_deps))  # pyright: ignore[reportCallIssue]
+    old_deps = df[cols].sort_values(age_col).tail(min(max_old_deps, n_deps))  # pyright: ignore[reportCallIssue]
+    # reverse the order to have oldest first
+    old_deps = old_deps.iloc[::-1]
     click.echo("\nOldest dependencies:")
     click.echo(_format_table(old_deps))
 

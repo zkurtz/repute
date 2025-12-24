@@ -34,7 +34,7 @@ jobs:
       run: uv run ruff format --check
 
     - name: Type checking
-      run: uv run pyright
+      run: uv run ty check
 
     - name: Unit tests
       run: uv run pytest -Werror
