@@ -4,6 +4,7 @@ import warnings
 from pathlib import Path
 
 import pandas as pd
+from packaging.requirements import Requirement
 
 from repute.data import Package
 
@@ -34,8 +35,24 @@ def parseline(line: str) -> Package | None:
         raise ValueError(f"requirements file inclusions are not supported: '{line}'")
 
     if PIN_OPERATOR in line:
-        package_name, version = line.split(PIN_OPERATOR)
-        return Package(name=package_name, version=version)
+        # Remove inline comments (standard for requirements files to have comments on separate lines,
+        # but we handle them for robustness)
+        # Only remove comments that are not within quotes (environment markers use quotes)
+        comment_pos = line.find("#")
+        if comment_pos != -1:
+            # Simple heuristic: if there's a semicolon before the #, it's likely in a marker
+            semicolon_pos = line.find(";")
+            if semicolon_pos == -1 or comment_pos < semicolon_pos:
+                line = line[:comment_pos].strip()
+
+        # Use packaging library to properly parse requirements with markers
+        req = Requirement(line)
+        # Check if the requirement has a pinned version using ==
+        for spec in req.specifier:
+            if spec.operator == PIN_OPERATOR:
+                return Package(name=req.name, version=spec.version)
+        # If we get here, there's a == but not in the version specifier
+        raise ValueError(f"Unable to parse '{line}' as a package and version")
     else:
         raise ValueError(f"Unable to parse '{line}' as a package and version")
 

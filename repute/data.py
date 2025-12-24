@@ -1,15 +1,17 @@
 """Core data structures for python package metadata."""
 
 from attrs import asdict, frozen
-from pandahandler.indexes import Index
+from pandahandler.indexes import FrozenList, Index
 
 INDEX = Index(
-    names=[
-        "name",
-        "version",
-    ]
+    names=FrozenList(
+        [
+            "name",
+            "version",
+        ]
+    )
 )
-NAME_INDEX = Index(names=["name"], require_unique=False)
+NAME_INDEX = Index(names=FrozenList(["name"]), require_unique=False)
 
 
 @frozen
