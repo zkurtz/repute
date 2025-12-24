@@ -4,9 +4,9 @@ Are your python project dependencies of good repute? Now you can run `repute` to
 
 ## Quickstart guide
 
-1. Generate a `requirements.txt` file for your project. For illustration, we'll use the `demo/requirements.txt` file in this repo.
-1. Install repute like `pip install repute`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
-1. Run `repute demo/requirements.txt` to analyze the health of your dependencies:
+1. Generate a `requirements.txt` file for your project.
+1. Install repute: `uv add repute`, ideally in its own virtual environment, so that it does not become part of the project that you want to analyze.
+1. Run `repute path/to/requirements.txt` to analyze the health of your dependencies:
 
 ```
 $ repute demo/requirements.txt

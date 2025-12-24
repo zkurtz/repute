@@ -13,6 +13,7 @@ from repute.pypi import analytics as pypi_analytics
 from repute.pypi.stats import download_pypi_stats
 
 DEFAULT_OUTPUT_PATH = "repute.csv"
+DEFAULT_MAX_OLD_DEPS = 10
 GITHUB_URL = "github_url"
 
 PYPI_REPORT_COLS = [
@@ -68,14 +69,21 @@ def load_github_data(df: pd.DataFrame) -> pd.DataFrame:
 @click.version_option(version=repute.__version__, prog_name="repute")
 @click.argument("input", type=click.Path(exists=True))
 @click.option("--output", type=click.Path(), default=DEFAULT_OUTPUT_PATH)
-def main(input: str, *, output: str = DEFAULT_OUTPUT_PATH) -> None:
+@click.option(
+    "--max-old-deps",
+    "max_old_deps",
+    type=int,
+    default=DEFAULT_MAX_OLD_DEPS,
+    help="Maximum number of old dependencies to report.",
+)
+def main(input: str, *, output: str = DEFAULT_OUTPUT_PATH, max_old_deps: int = DEFAULT_MAX_OLD_DEPS) -> None:
     """Analyze PyPI metadata from a requirements file."""
     packages = requirements.parse(Path(input))
     df = load_pypi_data(packages)
     df["github_url"] = adjust_github_urls(df.pop("pypi:github_url"))
     gh_df = load_github_data(df)
     df = df.merge(gh_df, left_index=True, right_index=True, how="left")
-    summarize(df)
+    summarize(df, max_old_deps=max_old_deps)
     df.to_csv(output)
     click.echo(f"\nSee {output} for detailed results.")
 
