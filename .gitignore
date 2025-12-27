@@ -17,6 +17,7 @@ venv*
 *.toc
 *.tmp
 dev*
+repute.code-workspace
 
 # Sphinx documentation builds
 docs/_build/
